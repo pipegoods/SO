@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Sistemas Operativos - Andres Vizcaino</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+
+</head>
+<body>
+    <nav>
+        <div class="nav-wrapper #81c784 green lighten-2">
+          <a href="https://twitter.com/pipegoods" class="brand-logo">Andrés Vizcaíno</a>
+        </div>
+    </nav>
+    <div class="divider"></div>
+    <div id="app">
+        <div class="container">
+            <div class="row">
+                <div class="col s12 m6 l4">
+                    <!-- Agregar procesos -->
+                    <h4>Agrega un nuevo proceso:</h4>
+                    <br>
+                    <div class="input-field">
+                        <input id="nombre_proceso" type="text" v-model="proceso.nombre">
+                        <label for="nombre_proceso">Nombre del proceso</label>
+                    </div>
+                    <div class="input-field">
+                        <input id="tiempo_llegada" type="number" min="0" v-model.number="proceso.tllegada">
+                        <label for="tiempo_llegada">Tiempo de llegada</label>
+                    </div>
+                    <div class="input-field">
+                        <input id="tiempo_cpu" type="number" min="0" v-model.number="proceso.tcpu">
+                        <label for="tiempo_cpu">Tiempo de CPU</label>
+                    </div>
+                    <div class="input-field">
+                        <input id="prioridad" type="number" min="0" v-model.number="proceso.prioridad">
+                        <label for="prioridad">Prioridad (menor valor mayor prioridad)</label>
+                    </div>
+                    <div class="center-align">
+                        <button class="waves-effect waves-light btn #81c784 green lighten-2" v-on:click="agregarProceso">Agregar</button>
+                    </div>
+                </div>
+               
+                <div class="col s12 m6 l8">
+                        <div class="card #81c784 green lighten-2" v-if="lista_procesos.length != 0">
+                                <div class="card-content">
+                                        <ul  class="collection">
+                                            <li v-for="pro in lista_procesos" class="collection-item">
+                                                <div>
+                                                    <span>{{pro.nombre}}</span>
+                                                    <span class="new badge blue" data-badge-caption=":Tiempo llegada">{{pro.tllegada}}</span>
+                                                    <span class="new badge green" data-badge-caption=":Tiempo CPU">{{pro.tcpu}}</span>
+                                                    <span class="new badge grey" data-badge-caption=":Prioridad">{{pro.prioridad}}</span>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                </div>
+                            </div>
+                        <div class="row" v-if="lista_procesos.length === 0">
+                            <br><br><br>
+                            <div class="card #81c784 green lighten-2">
+                                <div class="card-content white-text">
+                                    <span class="card-title">Estoy esperando nuevos procesos :)</span>
+                                </div>
+                            </div>
+                        </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col s12 m6 l4">
+                    <h1>Prioridad apropiativa</h1>
+                </div>
+                <div class="col s12 m6 l4">
+                    <h1>Prioridad no apropiativa</h1>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Tiempo Comienzo</th>
+                                <th>Tiempo Fin</th>
+                                <th>Tiempo Espera</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="pro in lista_prioridad_no">
+                                <td>{{pro.nombre}}</td>
+                                <td>{{pro.tiempoC}}</td>
+                                <td>{{pro.tiempoE}}</td>
+                                <td>{{pro.tiempoF}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    </table>
+                </div>
+                <div class="col s12 m6 l4">
+                    <h1>SRTF</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var app = new Vue({
+            el: '#app',
+            data: {
+                lista_procesos: [],
+                proceso: {},
+                lista_srtf: [],
+                lista_prioridad_no: []
+            },
+            methods: {
+                agregarProceso: function() {
+                    this.lista_procesos.push(this.proceso);
+                    M.toast({html: 'Proceso ' + this.proceso.nombre + ' fue agregado!'})
+                    this.proceso = {};
+
+                    if(this.lista_procesos.length >=2 && this.lista_procesos.length <=5){
+                        this.srtf();
+                        this.prioridad_no();
+                    }
+                },
+                srtf: function() {
+                    var lista_aux = [];
+                    var lista_aux2 = this.lista_procesos.slice();
+                    var pro_listos = [];
+                    var tiempoT = 0;
+                    var tiempoR = 0;
+                    var pro_aux = {};
+                    this.lista_procesos.forEach(pro => {
+                        tiempoT += pro.tcpu;
+                    });
+                    
+                    while (tiempoT > 0) {
+                        
+                        lista_aux2.forEach(function (pro, i) {
+                            if (pro.tllegada <= tiempoR) {
+                                lista_aux.push({
+                                    nombre: pro.nombre,
+                                    tllegada: pro.tllegada,
+                                    tcpu: pro.tcpu
+                                });
+                                lista_aux2.splice(i,1);   
+                            }
+                        });
+
+                        pro_aux = procesoMenorCpu(lista_aux);
+
+                        pro_aux.tcpu -= 1;
+
+                        if (pro_aux.tcpu == 0) {
+
+                            
+                            lista_aux = lista_aux.filter((i) => i.nombre !== pro_aux.nombre)
+                        }
+
+
+
+                        tiempoR += 1;
+                        tiempoT -= 1;
+                        
+                    }
+                    
+                }
+
+                , prioridad_no : function() {
+                    this.lista_prioridad_no = [];
+                    var lista_aux = this.lista_procesos.slice();
+                    var lista_aux2 = [];
+                    var lista_aux3 = [];
+                    var tiempoT = 0;
+                    this.lista_procesos.forEach(pro => {
+                        tiempoT += pro.tcpu;
+                    });
+
+                    var tiempo = 0;
+                    while (tiempo < tiempoT) {
+                        lista_aux3 = [];
+                        
+                        lista_aux.forEach(function (pro, i) {
+                            console.log(pro.nombre);
+                            console.log(tiempo);
+                            
+                            if (pro.tllegada === tiempo) {
+                                console.log("Entré");
+                                lista_aux3.push({
+                                    nombre: pro.nombre,
+                                    tcpu: pro.tcpu,
+                                    tllegada: pro.tllegada,
+                                    prioridad: pro.prioridad
+                                });
+                            }    
+                        });
+                        if (lista_aux3.length > 1) {
+                            console.log("Entré al if del tamaño");
+                            lista_aux3.sort(function (a, b) {
+                                if (a.prioridad > b.prioridad) {
+                                    return 1;
+                                }
+                                if (a.prioridad < b.prioridad) {
+                                    return -1;
+                                }
+                                // a must be equal to b
+                                return 0;
+                            });
+                            
+                            lista_aux3.forEach(pro => {
+                                lista_aux2.push({
+                                    nombre: pro.nombre,
+                                    tcpu: pro.tcpu,
+                                    tllegada: pro.tllegada,
+                                    prioridad: pro.prioridad
+                                });
+                            });
+                        } else if (lista_aux3.length === 1) {
+                            console.log("Entré al else del tamaño");
+                            lista_aux3.forEach(pro => {
+                                lista_aux2.push({
+                                    nombre: pro.nombre,
+                                    tcpu: pro.tcpu,
+                                    tllegada: pro.tllegada,
+                                    prioridad: pro.prioridad
+                                });
+                            });
+                        }
+                            
+                        if (lista_aux2.length === lista_aux.length) {
+                            break;
+                        }
+                        tiempo++;
+                    }
+
+                    console.log(lista_aux2);
+                    var tiempoA = 0;
+                    lista_aux2.forEach(element => {
+                        this.lista_prioridad_no.push({
+                            nombre: element.nombre,
+                            tiempoC: tiempoA,
+                            tiempoF: tiempoA + element.tcpu,
+                            tiempoE: tiempoA - element.tllegada
+                        });
+
+                        tiempoA += element.tcpu;
+                    });
+                    
+
+                    console.log(this.lista_prioridad_no);
+                    
+                }
+            }
+        });
+
+        procesoMenorCpu = function(lista){
+            var menorCpu = {tcpu: 99};
+            lista.forEach(pro => {
+                if(pro.tcpu <= menorCpu.tcpu){
+                    if(pro.tcpu < menorCpu.tcpu)
+                        menorCpu = pro;
+                    else {
+                        if (pro.tllegada < menorCpu.tllegada) {
+                            menorCpu = pro;
+                        }
+                    }
+                }
+            });
+            return menorCpu;
+        }
+    </script>
+
+    
+</body>
+</html>
