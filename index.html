@@ -15,7 +15,7 @@
 <body>
     <nav>
         <div class="nav-wrapper #81c784 green lighten-2">
-          <a href="https://twitter.com/pipegoods" class="brand-logo">Andrés Vizcaíno</a>
+          <a href="https://twitter.com/pipegoods" class="brand-logo center">Andrés Vizcaíno</a>
         </div>
     </nav>
     <div class="divider"></div>
@@ -117,8 +117,15 @@
             },
             methods: {
                 agregarProceso: function() {
-                    this.lista_procesos.push(this.proceso);
-                    M.toast({html: 'Proceso ' + this.proceso.nombre + ' fue agregado!'})
+                    
+                    if(this.lista_procesos.length < 5){
+                        this.lista_procesos.push(this.proceso);
+                        M.toast({html: 'Proceso ' + this.proceso.nombre + ' fue agregado!'})
+                        this.srtf();
+                        this.prioridad_no();
+                    } else {
+                        M.toast({html: 'Lista de procesos completa! max 5'})
+                    }
                     this.proceso = {};
 
                     if(this.lista_procesos.length >=2 && this.lista_procesos.length <=5){
@@ -129,55 +136,7 @@
                 srtf: function() {
                     this.lista_srtf = [];
                     var lista_aux = this.lista_procesos.slice();
-                    var tiempoT = 0;
-                    var lista_aux2 = [];
-                    var pro_listos = [];
-
-                    this.lista_procesos.forEach(pro => {
-                        tiempoT += pro.tcpu;
-                    });
                     
-                   var tiempo = 0;
-
-                   while (tiempo < tiempoT) {
-                       console.log(tiempo);
-                       
-                       lista_aux.forEach(function (pro, i) {
-                           if(pro.tllegada === tiempo){
-                               lista_aux2.push({
-                                   nombre: pro.nombre,
-                                   tcpu: pro.tcpu,
-                                   tllegada: pro.tllegada,
-                                   tiempoC: [],
-                                   tiempoE: [],
-                                   tiempoF: [],
-                                   ban: false
-                               });
-                               lista_aux.splice(i,1); 
-                           }
-                       });
-
-                       
-                     lista_aux2.forEach(function (pro, i){
-                         if (pro == procesoMenorCpu(lista_aux2)) {
-                            pro.tcpu -= 1;
-                            if (!pro.ban) {
-                                pro.tiempoC.push(tiempo);
-                                pro.ban = true;
-                                todosFalsos(lista_aux2, pro, tiempo);
-                            }
-                            if (pro.tcpu === 0) {
-                                pro_listos.push(pro);
-                                lista_aux2.splice(i,1); 
-                            }
-                         }
-                     });
-
-               
-                     console.log(pro_listos);
-                     
-                       tiempo++;
-                   }
                     
                 },
                 prioridad_no : function() {
@@ -256,33 +215,9 @@
             }
         });
 
-         procesoMenorCpu = function(lista){
-            var menorCpu = {tcpu: 99};
-            lista.forEach(pro => {
-                if(pro.tcpu <= menorCpu.tcpu){
-                    if(pro.tcpu < menorCpu.tcpu)
-                        menorCpu = pro;
-                    else {
-                        if (pro.tllegada < menorCpu.tllegada) {
-                            menorCpu = pro;
-                        }
-                    }
-                }
-            });
-            return menorCpu;
-        }
+    
 
-        todosFalsos = function (lista,proceso, tiempo){
-            lista.forEach(element => {
-                if (element != proceso) {
-                    
-                    if (element.ban) {
-                        element.tiempoF.push(tiempo);
-                    }
-                    element.ban = false;
-                }
-            });
-        }
+        
     </script>
 
     
