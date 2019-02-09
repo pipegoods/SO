@@ -197,10 +197,17 @@
                             }
                         });
                         
-                        
+                        if (tiempoT == index + 1) {
+                            lista_aux3.forEach(p => {
+                                if (aux_pro == p.nombre) {
+                                    p.tfin.push(index+1);
+                                }
+                            });
+                        }
                     }
 
                     
+
                     console.log(lista_aux3);
                     
                     
