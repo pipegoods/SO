@@ -127,23 +127,89 @@
                         M.toast({html: 'Lista de procesos completa! max 5'})
                     }
                     this.proceso = {};
-
+                    
                     if(this.lista_procesos.length >=2 && this.lista_procesos.length <=5){
-                        this.srtf();
                         this.prioridad_no();
+                        this.srtf();
+                        
                     }
                 },
                 srtf: function() {
                     this.lista_srtf = [];
-                    var lista_aux = this.lista_procesos.slice();
+                    let lista_aux = [];
+                    this.lista_procesos.forEach(pro=>{
+                        lista_aux.push({
+                            nombre: pro.nombre,
+                            tllegada: pro.tllegada,
+                            tcpu: pro.tcpu
+                        });
+                    });
+                    let tiempoT = 0;
+                    let lista_aux3 = [];
+                    let lista_aux2 = [];
+                    lista_aux.forEach(pro => {
+                        tiempoT += pro.tcpu;
+                        lista_aux3.push({
+                            nombre: pro.nombre,
+                            tllegada: pro.tllegada,
+                            tcpu: pro.tcpu,
+                            tcom: [],
+                            tfin: [],
+                            tesp: 0
+                        });
+                    });
+                    console.log(tiempoT);
+                    let aux_pro;
+                    let mini = 9999;
+                    let pro_ON;
+                    for (let index = 0; index < tiempoT; index++) {
+                        mini = 9999
+                        lista_aux2 = [];
+                        lista_aux.forEach(pro => {
+                            if (pro.tllegada <= index && pro.tcpu != 0) {
+                                lista_aux2.push(pro);
+                            }
+                        });
+                        
+                        lista_aux2.forEach(pro => {
+                            if (pro.tcpu < mini) {
+                                mini = pro.tcpu;
+                                aux_pro = pro.nombre;
+                            }
+                        });
+
+                        lista_aux.forEach(pro => {
+                            if(pro.nombre == aux_pro){
+                                if (pro_ON == pro.nombre) {
+                                    pro.tcpu--;
+                                } else {
+                                    lista_aux3.forEach(p => {
+                                        if (p.nombre == pro.nombre) {
+                                            p.tcom.push(index);
+                                        }
+                                        if (pro_ON == p.nombre) {
+                                            p.tfin.push(index);
+                                        }
+                                    });
+                                    pro_ON = pro.nombre;
+                                    pro.tcpu--;
+                                } 
+                            }
+                        });
+                        
+                        
+                    }
+
+                    
+                    console.log(lista_aux3);
                     
                     
                 },
                 prioridad_no : function() {
                     this.lista_prioridad_no = [];
-                    var lista_aux = this.lista_procesos.slice();
-                    var lista_aux2 = [];
-                    var lista_aux3 = [];
+                    var lista_x = this.lista_procesos.slice();
+                    var lista_2 = [];
+                    var lista_3 = [];
                     var tiempoT = 0;
                     this.lista_procesos.forEach(pro => {
                         tiempoT += pro.tcpu;
@@ -153,11 +219,10 @@
                     
                     while (tiempo < tiempoT) {
                         
-                        lista_aux3 = [];
-                        lista_aux.forEach(function (pro, i) {
+                        lista_3 = [];
+                        lista_x.forEach(function (pro, i) {
                             if (pro.tllegada === tiempo) {
-                                console.log("Entré");
-                                lista_aux3.push({
+                                lista_3.push({
                                     nombre: pro.nombre,
                                     tcpu: pro.tcpu,
                                     tllegada: pro.tllegada,
@@ -165,8 +230,8 @@
                                 });
                             }    
                         });
-                        if (lista_aux3.length > 1) {
-                            lista_aux3.sort(function (a, b) {
+                        if (lista_3.length > 1) {
+                            lista_3.sort(function (a, b) {
                                 if (a.prioridad > b.prioridad) {
                                     return 1;
                                 }
@@ -176,17 +241,17 @@
                                 return 0;
                             });
                             
-                            lista_aux3.forEach(pro => {
-                                lista_aux2.push({
+                            lista_3.forEach(pro => {
+                                lista_2.push({
                                     nombre: pro.nombre,
                                     tcpu: pro.tcpu,
                                     tllegada: pro.tllegada,
                                     prioridad: pro.prioridad
                                 });
                             });
-                        } else if (lista_aux3.length === 1) {
-                            lista_aux3.forEach(pro => {
-                                lista_aux2.push({
+                        } else if (lista_3.length === 1) {
+                            lista_3.forEach(pro => {
+                                lista_2.push({
                                     nombre: pro.nombre,
                                     tcpu: pro.tcpu,
                                     tllegada: pro.tllegada,
@@ -195,13 +260,13 @@
                             });
                         }
                             
-                        if (lista_aux2.length === lista_aux.length) {
+                        if (lista_2.length === lista_x.length) {
                             break;
                         }
                         tiempo++;
                     }
                     var tiempoA = 0;
-                    lista_aux2.forEach(element => {
+                    lista_2.forEach(element => {
                         this.lista_prioridad_no.push({
                             nombre: element.nombre,
                             tiempoC: tiempoA,
