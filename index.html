@@ -97,10 +97,27 @@
                             </tr>
                         </tbody>
                     </table>
-                    </table>
                 </div>
                 <div class="col s12 m6 l4">
                     <h4>SRTF</h1>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Tiempo Comienzo</th>
+                                    <th>Tiempo Fin</th>
+                                    <th>Tiempo Espera</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="pro in lista_srtf">
+                                    <td>{{pro.nombre}}</td>
+                                    <td>{{pro.tcom}}</td>
+                                    <td>{{pro.tfin}}</td>
+                                    <td>{{pro.tesp}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
                 </div>
             </div>
         </div>
@@ -145,11 +162,11 @@
                         });
                     });
                     let tiempoT = 0;
-                    let lista_aux3 = [];
+                    this.lista_srtf = [];
                     let lista_aux2 = [];
                     lista_aux.forEach(pro => {
                         tiempoT += pro.tcpu;
-                        lista_aux3.push({
+                        this.lista_srtf.push({
                             nombre: pro.nombre,
                             tllegada: pro.tllegada,
                             tcpu: pro.tcpu,
@@ -183,7 +200,7 @@
                                 if (pro_ON == pro.nombre) {
                                     pro.tcpu--;
                                 } else {
-                                    lista_aux3.forEach(p => {
+                                    this.lista_srtf.forEach(p => {
                                         if (p.nombre == pro.nombre) {
                                             p.tcom.push(index);
                                         }
@@ -198,7 +215,7 @@
                         });
                         
                         if (tiempoT == index + 1) {
-                            lista_aux3.forEach(p => {
+                            this.lista_srtf.forEach(p => {
                                 if (aux_pro == p.nombre) {
                                     p.tfin.push(index+1);
                                 }
@@ -206,9 +223,19 @@
                         }
                     }
 
-                    
+                    let retorno = 0;
+                    let a_ = 0;
+                    this.lista_srtf.forEach(pro => {
+                        retorno = pro.tfin[pro.tfin.length - 1] - pro.tllegada;
+                        for (let index = 0; index < pro.tcom.length; index++) {
+                           a_ += pro.tfin[index] - pro.tcom[index];
+                        }
+                        pro.tesp = retorno - a_;
+                        retorno = 0;
+                        a_ = 0;
+                    });
 
-                    console.log(lista_aux3);
+                    console.log(this.lista_srtf);
                     
                     
                 },
