@@ -76,6 +76,24 @@
             <div class="row">
                 <div class="col s12 m6 l4">
                     <h4>Prioridad apropiativa</h1>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Tiempo Comienzo</th>
+                                    <th>Tiempo Fin</th>
+                                    <th>Tiempo Espera</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="pro in lista_prioridad_si">
+                                    <td>{{pro.nombre}}</td>
+                                    <td>{{pro.tcom}}</td>
+                                    <td>{{pro.tfin}}</td>
+                                    <td>{{pro.tesp}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
                 </div>
                 <div class="col s12 m6 l4">
                     <h4>Prioridad no apropiativa</h1>
@@ -130,7 +148,8 @@
                 lista_procesos: [],
                 proceso: {},
                 lista_srtf: [],
-                lista_prioridad_no: []
+                lista_prioridad_no: [],
+                lista_prioridad_si: []
             },
             methods: {
                 agregarProceso: function() {
@@ -140,6 +159,7 @@
                         M.toast({html: 'Proceso ' + this.proceso.nombre + ' fue agregado!'})
                         this.srtf();
                         this.prioridad_no();
+                        this.prioridad_si();
                     } else {
                         M.toast({html: 'Lista de procesos completa! max 5'})
                     }
@@ -162,7 +182,6 @@
                         });
                     });
                     let tiempoT = 0;
-                    this.lista_srtf = [];
                     let lista_aux2 = [];
                     lista_aux.forEach(pro => {
                         tiempoT += pro.tcpu;
@@ -175,7 +194,6 @@
                             tesp: 0
                         });
                     });
-                    console.log(tiempoT);
                     let aux_pro;
                     let mini = 9999;
                     let pro_ON;
@@ -235,7 +253,6 @@
                         a_ = 0;
                     });
 
-                    console.log(this.lista_srtf);
                     
                     
                 },
@@ -310,6 +327,94 @@
 
                         tiempoA += element.tcpu;
                     });        
+                },
+                prioridad_si: function(){
+                    this.lista_prioridad_si = [];
+                    let aux = [];
+                    this.lista_procesos.forEach(pro=>{
+                        aux.push({
+                            nombre: pro.nombre,
+                            tllegada: pro.tllegada,
+                            tcpu: pro.tcpu,
+                            prioridad: pro.prioridad
+                        });
+                    });
+                    let tiempoT = 0;
+                    this.lista_prioridad_si = [];
+                    let lista_aux2 = [];
+                    aux.forEach(pro => {
+                        tiempoT += pro.tcpu;
+                        this.lista_prioridad_si.push({
+                            nombre: pro.nombre,
+                            tllegada: pro.tllegada,
+                            tcpu: pro.tcpu,
+                            tcom: [],
+                            tfin: [],
+                            tesp: 0
+                        });
+                    });
+                    let aux_pro;
+                    let mini = 9999;
+                    let pro_ON;
+                    for (let index = 0; index < tiempoT; index++) {
+                        mini_pro = 9999
+                        lista_aux2 = [];
+                        aux.forEach(pro => {
+                            if (pro.tllegada <= index && pro.tcpu != 0) {
+                                lista_aux2.push(pro);
+                            }
+                        });
+                        
+                        lista_aux2.forEach(pro => {
+                            if (pro.prioridad < mini_pro) {
+                                mini_pro = pro.prioridad;
+                                aux_pro = pro.nombre;
+                            }
+                        });
+
+                        aux.forEach(pro => {
+                            if(pro.nombre == aux_pro){
+                                if (pro_ON == pro.nombre) {
+                                    pro.tcpu--;
+                                } else {
+                                    this.lista_prioridad_si.forEach(p => {
+                                        if (p.nombre == pro.nombre) {
+                                            p.tcom.push(index);
+                                        }
+                                        if (pro_ON == p.nombre) {
+                                            p.tfin.push(index);
+                                        }
+                                    });
+                                    pro_ON = pro.nombre;
+                                    pro.tcpu--;
+                                } 
+                            }
+                        });
+                        
+                        if (tiempoT == index + 1) {
+                            this.lista_prioridad_si.forEach(p => {
+                                if (aux_pro == p.nombre) {
+                                    p.tfin.push(index+1);
+                                }
+                            });
+                        }
+                    }
+
+                    let retorno = 0;
+                    let a_ = 0;
+                    this.lista_prioridad_si.forEach(pro => {
+                        retorno = pro.tfin[pro.tfin.length - 1] - pro.tllegada;
+                        for (let index = 0; index < pro.tcom.length; index++) {
+                           a_ += pro.tfin[index] - pro.tcom[index];
+                        }
+                        pro.tesp = retorno - a_;
+                        retorno = 0;
+                        a_ = 0;
+                    });
+
+                    console.log(this.lista_prioridad_si);
+                    
+                    
                 }
             }
         });
