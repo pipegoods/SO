@@ -74,8 +74,8 @@
             </div>
 
             <div class="row">
-                <div class="col s12 m6 l4">
-                    <h4>Prioridad apropiativa</h1>
+                <div class="col s12 m12 l12">
+                    <h4>Prioridad apropiativa</h4>
                         <table>
                             <thead>
                                 <tr>
@@ -94,9 +94,17 @@
                                 </tr>
                             </tbody>
                         </table>
+                        <br>
+                        
+                    <ul class="pagination ">
+                        <li class="disabled"><a href="#!"><i class="material-icons">chevron_left</i></a></li>
+                        <li class="active #81c784 green lighten-2" v-for="pro in linea3"><a href="#!">{{pro}}</a></li>
+
+                        <li class="waves-effect"><a href="#!"><i class="material-icons">chevron_right</i></a></li>
+                    </ul>
                 </div>
-                <div class="col s12 m6 l4">
-                    <h4>Prioridad no apropiativa</h1>
+                <div class="col s12 m12 l12">
+                    <h4>Prioridad no apropiativa</h4>
                     <table>
                         <thead>
                             <tr>
@@ -115,9 +123,17 @@
                             </tr>
                         </tbody>
                     </table>
+                    <br>
+                        
+                    <ul class="pagination ">
+                        <li class="disabled"><a href="#!"><i class="material-icons">chevron_left</i></a></li>
+                        <li class="active #81c784 green lighten-2" v-for="pro in lista_prioridad_no"><a href="#!">{{pro.nombre}}</a></li>
+
+                        <li class="waves-effect"><a href="#!"><i class="material-icons">chevron_right</i></a></li>
+                    </ul>
                 </div>
-                <div class="col s12 m6 l4">
-                    <h4>SRTF</h1>
+                <div class="col s12 m12 l12">
+                    <h4>SRTF</h4>
                         <table>
                             <thead>
                                 <tr>
@@ -136,6 +152,14 @@
                                 </tr>
                             </tbody>
                         </table>
+                        <br>
+                        
+                    <ul class="pagination ">
+                        <li class="disabled"><a href="#!"><i class="material-icons">chevron_left</i></a></li>
+                        <li class="active #81c784 green lighten-2" v-for="pro in linea1"><a href="#!">{{pro}}</a></li>
+
+                        <li class="waves-effect"><a href="#!"><i class="material-icons">chevron_right</i></a></li>
+                    </ul>
                 </div>
             </div>
         </div>
@@ -149,7 +173,10 @@
                 proceso: {},
                 lista_srtf: [],
                 lista_prioridad_no: [],
-                lista_prioridad_si: []
+                lista_prioridad_si: [],
+                linea1: [],
+                linea2: [],
+                linea3: []
             },
             methods: {
                 agregarProceso: function() {
@@ -174,6 +201,7 @@
                 srtf: function() {
                     this.lista_srtf = [];
                     let lista_aux = [];
+                    this.linea1 = [];
                     this.lista_procesos.forEach(pro=>{
                         lista_aux.push({
                             nombre: pro.nombre,
@@ -227,6 +255,7 @@
                                         }
                                     });
                                     pro_ON = pro.nombre;
+                                    
                                     pro.tcpu--;
                                 } 
                             }
@@ -239,6 +268,7 @@
                                 }
                             });
                         }
+                        this.linea1.push(pro_ON);
                     }
 
                     let retorno = 0;
@@ -331,6 +361,7 @@
                 prioridad_si: function(){
                     this.lista_prioridad_si = [];
                     let aux = [];
+                    this.linea3 = [];
                     this.lista_procesos.forEach(pro=>{
                         aux.push({
                             nombre: pro.nombre,
@@ -398,6 +429,8 @@
                                 }
                             });
                         }
+
+                        this.linea3.push(pro_ON);
                     }
 
                     let retorno = 0;
